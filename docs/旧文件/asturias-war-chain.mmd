@@ -1,0 +1,77 @@
+%% CNT–FAI 西班牙共和国模拟器：工人联盟（Alianza Obrera）→ 阿斯图里亚斯战争 完整事件链
+%% 实线 = 事件/日志链的正常推进；虚线 = 条件触发的旁路、失败分支与循环回流。
+%% 每个节点都在末尾标注了对应的源码位置或状态字段。
+flowchart TD
+  classDef start fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef cond fill:#fef3c7,stroke:#b45309,color:#0f172a
+  classDef event fill:#f8fafc,stroke:#475569,color:#0f172a
+  classDef journal fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef war fill:#fee2e2,stroke:#b91c1c,color:#0f172a
+  classDef win fill:#bbf7d0,stroke:#15803d,color:#0f172a
+  classDef lose fill:#fecaca,stroke:#991b1b,color:#0f172a
+  classDef stop fill:#e2e8f0,stroke:#64748b,color:#0f172a
+
+  subgraph PRE["① 前置状态（1933·11 大选）"]
+    E33["事件：1933 年大选结果<br/>elections_1933_results"]:::event
+    S33["状态：cntStance = 'oppose'<br/>rulingCoalition = 'ceda_radical'"]:::start
+  end
+
+  subgraph UHP["② 工人联盟政治链（日志 + 事件）"]
+    D0{"触发判定：workers_alliance_attempt.condition<br/>rulingCoalition = 'ceda_radical'<br/>且 ≠ 'popular_front'、cntStance = 'oppose'"}:::cond
+    E1["事件：工人联盟的尝试？<br/>唯一选项 → uhp_attempt_triggered = true<br/>activateJournal(journal_uhp) → 日志开启"]:::event
+    J1["日志：联合无产阶级兄弟 UHP<br/>完成：PSOE 关系 ≥ 70 → 弹出结果事件<br/>失败：PSOE 进入政党联盟"]:::journal
+    E2{"事件：十字路口<br/>无产阶级起义还是反法西斯同盟？<br/>（UHP 完成时由管线弹出的结果事件）"}:::cond
+    A1["选项 A：无产阶级起义！<br/>activateJournal(journal_alianza_obrera)<br/>革命热情 +15、PSOE +15<br/>Faistas +10、推动进度 +1"]:::event
+    B1["选项 B：反法西斯同盟<br/>组建 popular_front、Faistas +5<br/>cntStance = 'cooperate'<br/>工人联盟日志 failed"]:::stop
+    J2["日志：工人联盟 Alianza Obrera<br/>完成：PSOE ≥ 80 且 PCE ≥ 60<br/>且 推动进度 ≥ 3 且 CNT ≥ 18<br/>且 CNT+UGT ≥ 35 且 右翼工会 ≤ 12"]:::journal
+    E3["事件：工人联盟宣告成立<br/>选项里成立 workers_alliance 联盟<br/>（月结不抢先执行）"]:::event
+  end
+
+  subgraph AST["③ 阿斯图里亚斯革命判定"]
+    D1{"触发判定：asturias_revolution.condition<br/>非历史：UHP 完成 且 紧张度 > 60<br/>且 革命热情 > 50 且 ≥ 1934·8<br/>且 rulingCoalition = 'ceda_radical'<br/>历史难度：≥ 1934·10（仅日期）"}:::cond
+    D2{"事件：阿斯图里亚斯革命爆发<br/>选项一门槛：工人联盟日志已完成<br/>且 革命热情 > 80<br/>且 Faistas + Puristas > 80"}:::cond
+    NO["选项二：仅阿斯图里亚斯的同志们参与<br/>wars.asturias_war = 'failed'<br/>后继事件：革命热情 −20 或 −12"]:::stop
+  end
+
+  subgraph WAR["④ 阿斯图里亚斯战争（地图战）"]
+    W0["战争初始化<br/>asturias + oviedo → WORKERS_ALLIANCE<br/>其余省份 → REPUBLICAN<br/>phase = 'war'、asturiasWarTurns = 0"]:::war
+    W1["初始兵力<br/>工人联盟 3 支部队 / 12,000 人<br/>共和国 3 支守备队 + 常备军 8 个师"]:::war
+    W2["月度战争循环<br/>玩家 2 指挥点 → 结束回合<br/>→ 共和国 AI 2 指挥点<br/>→ 退出地图 → 下月管线 + 回合数 +1"]:::war
+    W3["事件：安达卢西亚之火<br/>asturiasWarTurns ≥ 3<br/>cadiz + malaga → 工人联盟<br/>各 +2,000 步兵、革命热情 +10"]:::war
+    D3{"胜负判定：checkWarStatus<br/>每次战斗后与每次回合结束时"}:::cond
+  end
+
+  subgraph END["⑤ 结局"]
+    LOST["战败：wars.asturias_war = 'lost'<br/>结局 ASTURIAS_WAR_LOST<br/>isGameOver，本局失败"]:::lose
+    WON["战胜：wars.asturias_war = 'won'<br/>革命热情 +25、共和国权威 −15<br/>军备 +3、资源 +2<br/>回到常规政治游戏"]:::win
+  end
+
+  %% ---- 政治链 ----
+  E33 --> S33
+  S33 --> D0
+  D0 -->|满足| E1
+  D0 -.->|不满足：等待下个月度检测| D0
+  E1 --> J1
+  J1 -->|PSOE 关系 ≥ 70：完成| E2
+  J1 -.->|PSOE 加入政党联盟：失败| B1
+  E2 -->|选项 A| A1
+  E2 -->|选项 B| B1
+  A1 --> J2
+  B1 -.->|工人联盟路线关闭| PF["人民阵线 / 1936 大选主线"]:::stop
+  J2 -->|六项条件全部达成：完成| E3
+  J2 -.->|PSOE 进入联盟：失败| B1
+  E3 --> D1
+
+  %% ---- 革命判定 ----
+  D1 -->|满足且无内战 / 无其他战争| D2
+  D1 -.->|已内战中 / 已有 activeWar / asturias_war 已推进| SKIP["本次不再触发<br/>（单次事件，永不复现）"]:::stop
+  D2 -->|选项一：CNT 全力加入| W0
+  D2 -->|选项二：仅阿斯图里亚斯参与| NO
+  NO -.->|无结局，回到原政治主线| PF
+
+  %% ---- 战争 ----
+  W0 --> W1 --> W2 --> W3 --> D3
+  D3 -->|失去 asturias 与 oviedo：战败| LOST
+  D3 -->|控制 madrid + malaga + zaragoza + valencia：战胜| WON
+  D3 -.->|未分胜负：继续下一个月| W2
+  W3 -.->|asturiasWarTurns < 3| W2

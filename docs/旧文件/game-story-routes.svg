@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2100" viewBox="0 0 1800 2100">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker>
+    <style>
+      .title{font:700 30px 'Microsoft YaHei',sans-serif;fill:#0f172a}.subtitle{font:400 16px 'Microsoft YaHei',sans-serif;fill:#475569}
+      .stage{font:700 19px 'Microsoft YaHei',sans-serif;fill:#0f172a}.body{font:400 15px 'Microsoft YaHei',sans-serif;fill:#1e293b}
+      .small{font:400 13px 'Microsoft YaHei',sans-serif;fill:#334155}.ending{font:700 15px 'Microsoft YaHei',sans-serif;fill:#fff}
+      .box{stroke:#334155;stroke-width:2;rx:14}.event{fill:#eff6ff}.choice{fill:#fff7ed}.war{fill:#fef2f2}.win{fill:#166534}.loss{fill:#991b1b}.neutral{fill:#475569}
+      .edge{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.dashed{stroke-dasharray:8 7}.thin{stroke-width:1.5}
+    </style>
+  </defs>
+  <rect width="1800" height="2100" fill="#f8fafc"/>
+  <text x="70" y="62" class="title">CNT–FAI 西班牙共和国模拟器：关键剧情路线图</text>
+  <text x="70" y="92" class="subtitle">实线＝主事件链；虚线＝顾问/卡牌/日志门槛；红色＝战争与失败；绿色＝胜利结局</text>
+
+  <!-- scenario entrances -->
+  <rect x="70" y="135" width="490" height="105" class="box event"/><text x="95" y="170" class="stage">1931·4 共和国诞生</text><text x="95" y="198" class="body">宣告共和国 → 五月骚乱/军改 → CNT 第三次大会</text><text x="95" y="222" class="small">完整政治前置链；可进入 1931 大选</text>
+  <rect x="655" y="135" width="490" height="105" class="box event"/><text x="680" y="170" class="stage">1933·11 黑色两年开局</text><text x="680" y="198" class="body">激进党–CEDA 执政，CNT 反对派</text><text x="680" y="222" class="small">直接进入 UHP/阿斯图里亚斯/1936 选举</text>
+  <rect x="1240" y="135" width="490" height="105" class="box war"/><text x="1265" y="170" class="stage">1936·7 内战开局</text><text x="1265" y="198" class="body">civilWarStatus=ongoing → 超级事件 → civil_war_setup</text><text x="1265" y="222" class="small">跳过 1931/1933/总统选举政治链</text>
+
+  <!-- early chain -->
+  <rect x="70" y="300" width="490" height="125" class="box event"/><text x="95" y="335" class="stage">CNT 第三次大会</text><text x="95" y="363" class="body">组织集中化 ↔ 地方联邦制</text><text x="95" y="388" class="body">农村路线、宣传路线、议会主义立场</text><text x="95" y="412" class="small">最终关键旗标：cntStance = oppose / cooperate</text>
+  <path d="M315 240 L315 300" class="edge"/>
+  <rect x="70" y="475" width="490" height="125" class="box choice"/><text x="95" y="510" class="stage">1931 大选结果</text><text x="95" y="538" class="body">共和–社会党联盟（常规）</text><text x="95" y="563" class="body">共和派联盟（>235 席时可选）</text><text x="95" y="587" class="small">cooperate → 入阁提议；oppose → CNT 被排除</text>
+  <path d="M315 425 L315 475" class="edge"/>
+  <rect x="70" y="650" width="240" height="125" class="box choice"/><text x="88" y="684" class="stage">拒绝入阁</text><text x="88" y="712" class="body">外部容忍</text><text x="88" y="738" class="small">保持反国家路线</text>
+  <rect x="320" y="650" width="240" height="125" class="box choice"/><text x="338" y="684" class="stage">接受入阁</text><text x="338" y="712" class="body">cntStance=govern</text><text x="338" y="738" class="small">→ Minister Allocation</text>
+  <path d="M315 600 L190 650" class="edge"/><path d="M315 600 L440 650" class="edge"/>
+  <rect x="70" y="825" width="490" height="105" class="box event"/><text x="95" y="860" class="stage">1932–1935 组织/危机层</text><text x="95" y="888" class="body">三十人宣言 · PRRevS · Jabalí · CEDA/Falange · Nombela</text><text x="95" y="912" class="small">政府联盟解体 → 自动总统解散与提前大选</text>
+  <path d="M190 775 L190 825" class="edge"/><path d="M440 775 L440 825" class="edge"/>
+
+  <!-- prrevs/uhp branches -->
+  <rect x="655" y="300" width="490" height="125" class="box choice"/><text x="680" y="335" class="stage">CNT 内部分歧与 PRRevS</text><text x="680" y="363" class="body">Pestaña 在场 + 官僚化/影响/建设度门槛</text><text x="680" y="388" class="body">组建 ↔ 延期 ↔ 永久放弃；驱逐 Pestaña 会封死路线</text><text x="680" y="412" class="small">PRRevS 成立 ≥1 月 → Jabalí 事件</text>
+  <rect x="655" y="475" width="235" height="105" class="box choice"/><text x="675" y="510" class="stage">UHP/工人联盟</text><text x="675" y="538" class="body">Orobón + PSOE 关系</text><text x="675" y="563" class="small">完成后形成 workers_alliance</text>
+  <rect x="910" y="475" width="235" height="105" class="box choice"/><text x="930" y="510" class="stage">Jabalí 路线</text><text x="930" y="538" class="body">解锁 Ramón/Pedro</text><text x="930" y="563" class="small">影响总统与内战特殊选项</text>
+  <path d="M900 425 L770 475" class="edge"/><path d="M900 425 L1025 475" class="edge"/>
+  <rect x="655" y="650" width="490" height="125" class="box choice"/><text x="680" y="685" class="stage">1934+ 十字路口</text><text x="680" y="713" class="body">无产阶级起义 → 高革命热情/阿斯图里亚斯</text><text x="680" y="738" class="body">反法西斯同盟 → popular_front、日志失败、选举路线</text><text x="680" y="762" class="small">Asturias 全力加入需联盟完成 + fervor&gt;80 + 激进派影响&gt;80</text>
+  <path d="M900 580 L900 650" class="edge"/>
+
+  <!-- 1936 politics -->
+  <rect x="70" y="1000" width="490" height="125" class="box choice"/><text x="95" y="1035" class="stage">1936 大选</text><text x="95" y="1063" class="body">特赦优先/合作 ↔ 绝对弃权</text><text x="95" y="1088" class="small">结果：popular_front（左翼≥右翼）或 national_front</text><text x="95" y="1112" class="small">右翼胜利会回滚改革、CNT 反对派化</text>
+  <path d="M315 930 L315 1000" class="edge"/>
+  <rect x="655" y="825" width="490" height="125" class="box choice"/><text x="680" y="860" class="stage">阿斯图里亚斯革命</text><text x="680" y="888" class="body">CNT 全力加入 → asturias_war 地图</text><text x="680" y="913" class="body">仅当地参加 → failed 叙事（地图实败才写 lost）</text><text x="680" y="937" class="small">asturias_war=lost 时触发独立失败结局</text>
+  <path d="M900 775 L900 825" class="edge"/>
+  <path d="M900 775 C900 875 560 875 560 1000" class="edge dashed"/>
+  <rect x="70" y="1180" width="490" height="125" class="box choice"/><text x="95" y="1215" class="stage">政府危机 → 总统解散 → 提前大选</text><text x="95" y="1243" class="body">席位最高联盟重新组阁</text><text x="95" y="1268" class="small">第二次解散后可使用 Impeach President 卡</text>
+  <path d="M315 1125 L315 1180" class="edge"/>
+  <rect x="655" y="1000" width="490" height="125" class="box choice"/><text x="680" y="1035" class="stage">总统选举链</text><text x="680" y="1063" class="body">弃权 → 阿萨尼亚自动当选</text><text x="680" y="1088" class="body">参与 → 左翼初选 → 左/中/右候选人 → 两轮投票</text><text x="680" y="1112" class="small">Ramón 选项需完成 3 次竞选事件</text>
+  <path d="M560 1240 C620 1240 600 1060 655 1060" class="edge"/><path d="M560 1125 C620 1125 620 1060 655 1060" class="edge dashed"/>
+
+  <!-- war -->
+  <rect x="1240" y="300" width="490" height="140" class="box war"/><text x="1265" y="338" class="stage">内战触发</text><text x="1265" y="368" class="body">1936 开局，或 coupProgress=100</text><text x="1265" y="394" class="body">civil_war_setup：快速历史部署 ↔ 沉浸式 cw_step1–31</text><text x="1265" y="420" class="small">Radio / PSOE 关系 / Ramón / Pedro Vallina 提供特殊分支</text>
+  <path d="M1485 240 L1485 300" class="edge"/>
+  <rect x="1240" y="490" width="490" height="140" class="box war"/><text x="1265" y="528" class="stage">地图战与战争支线</text><text x="1265" y="558" class="body">加泰罗尼亚：CNT 夺权 ↔ Companys 委员会</text><text x="1265" y="584" class="body">阿拉贡委员会、民兵整编、坦克、国际援助</text><text x="1265" y="610" class="small">地区控制与战略价值决定投降条件</text>
+  <path d="M1485 440 L1485 490" class="edge"/>
+  <rect x="1240" y="680" width="235" height="120" class="box win"/><text x="1260" y="718" class="ending">国民军投降</text><text x="1260" y="746" class="ending">civilWarStatus=won</text><text x="1260" y="774" class="ending">→ 右侧胜利结局树</text>
+  <rect x="1495" y="680" width="235" height="120" class="box loss"/><text x="1515" y="718" class="ending">共和国投降</text><text x="1515" y="746" class="ending">civilWarStatus=lost</text><text x="1515" y="774" class="ending">→ WE_HAVE_PASSED</text>
+  <path d="M1485 630 L1355 680" class="edge"/><path d="M1485 630 L1615 680" class="edge"/>
+
+  <!-- endings -->
+  <rect x="70" y="1430" width="1660" height="95" class="box neutral"/><text x="95" y="1470" class="ending">1939 时间线：未开战 → SILENT_REPUBLIC（寂静的共和）；仍在鏖战 → FOR_WHOM_THE_BELL_TOLLS（丧钟为谁而鸣）</text><text x="95" y="1498" class="ending">阿斯图里亚斯独立战败 → ASTURIAS_WAR_LOST（阿斯图里亚斯工人的挽歌）</text>
+  <path d="M900 950 C900 1360 500 1360 500 1430" class="edge dashed"/><path d="M1485 800 L1485 1430" class="edge dashed"/>
+
+  <rect x="70" y="1580" width="390" height="135" class="box win"/><text x="95" y="1620" class="ending">CHILDREN_OF_THE_PEOPLE</text><text x="95" y="1650" class="ending">人民之子</text><text x="95" y="1680" class="ending">胜利 + 革命热情&gt;80 + 平均分歧&lt;30</text>
+  <rect x="500" y="1580" width="390" height="135" class="box win"/><text x="525" y="1620" class="ending">POPULAR_FRONT</text><text x="525" y="1650" class="ending">人民阵线</text><text x="525" y="1680" class="ending">胜利 + 革命热情&lt;40 + CNT 执政</text>
+  <rect x="930" y="1580" width="390" height="135" class="box win"/><text x="955" y="1620" class="ending">GENERIC_WIN</text><text x="955" y="1650" class="ending">脆弱的和平</text><text x="955" y="1680" class="ending">其余所有内战胜利</text>
+  <rect x="1360" y="1580" width="370" height="135" class="box loss"/><text x="1385" y="1620" class="ending">RUSSIAN_SPAIN / GREAT_PURGE</text><text x="1385" y="1650" class="ending">俄属西班牙 / 大清洗</text><text x="1385" y="1680" class="ending">PCE 条件；大清洗优先级更高</text>
+  <path d="M1355 800 C1355 1510 1120 1510 1120 1580" class="edge"/><path d="M1355 800 C1355 1500 1180 1500 1180 1580" class="edge dashed"/>
+  <path d="M1615 800 C1615 1500 1450 1500 1450 1580" class="edge"/>
+  <path d="M900 1125 C900 1510 210 1510 210 1580" class="edge dashed"/><path d="M900 1125 C900 1510 650 1510 650 1580" class="edge dashed"/>
+  <text x="70" y="1810" class="subtitle">隐性门槛：Pestaña/PRRevS、Orobón/UHP、Ramón 竞选、Pedro Vallina、广播等级、coupProgress、莫斯科黄金与 PCE 旗标。</text>
+  <text x="70" y="1840" class="subtitle">注意：当前源码没有正常路径写入 pceInPower 与 pceAcceptsComintern，因此 RUSSIAN_SPAIN 通常不可达（沙盒手动改值除外）。</text>
+</svg>

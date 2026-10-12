@@ -1,0 +1,36 @@
+import type { GameEvent } from '../../types';
+import { applyControlInfluence } from '../../rules/controlShares';
+
+const civilWarMeta = {
+  category: 'war' as const,
+  flow: 'solo' as const,
+  series: ['civil_war'],
+  tags: ['map'],
+};
+
+export const cataloniaDefense: GameEvent = {
+  id: 'catalonia_defense',
+  meta: civilWarMeta,
+  condition: (state) => state.civilWarStatus === 'ongoing' && state.cataloniaControl === 'republic',
+  title: 'The Defense of Catalonia',
+  titleZh: '保卫加泰罗尼亚',
+  description: 'Anarchist militias erect barricades across Barcelona. Security forces join the resistance; Assault Guards share weapons with the anarchist defenders. Anarchist leaders meet with Lluís Companys, president of the Generalitat.',
+  descriptionZh: '无政府主义民兵在巴塞罗那各处设立路障。安全部队加入抵抗；突击警卫与无政府主义守军共享武器。无政府主义领袖会见加泰罗尼亚政府主席孔帕尼斯。',
+  options: [
+    {
+      text: 'The Anarchists Seize Power!',
+      textZh: '无政府主义者夺取政权！',
+      effect: (state) => ({
+        cataloniaControl: 'cnt_fai',
+        ...applyControlInfluence(state, 10, { land: 0.2, industry: 0.8 })
+      })
+    },
+    {
+      text: 'Temporary Alliance with Companys',
+      textZh: '无政府主义者与孔帕尼斯暂时结盟',
+      effect: () => ({
+        cataloniaControl: 'committee'
+      })
+    }
+  ]
+};

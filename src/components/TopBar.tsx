@@ -1,0 +1,355 @@
+import { getPartyName } from "../game/partyNames";
+import React, { useState } from 'react';
+import { useGameActions, useGameSelector, shallowEqual } from '../game/GameContext';
+import { cn } from '../lib/utils';
+import { Calendar, Coins, ShieldAlert, Settings, HardDrive, Globe, X, Trophy, Radio } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { AchievementsModal } from './AchievementsModal';
+import { useMusic, MusicPlayerUI } from './MusicPlayer';
+import { EconomyModal } from './EconomyModal';
+import { DomesticPoliticsModal } from './DomesticPoliticsModal';
+import { DomesticPolicyModal } from './DomesticPolicyModal';
+import { LawStanceModal } from './LawStanceModal';
+import { SaveManagerModal } from './SaveManagerModal';
+import {
+  areDomesticPolicyModalStatesEqual,
+  areEconomyModalStatesEqual,
+  areLawStanceModalStatesEqual,
+  arePoliticalModalStatesEqual,
+  selectDomesticPolicyModalState,
+  selectEconomyModalState,
+  selectLawStanceModalState,
+  selectPoliticalModalState,
+} from '../game/selectors';
+
+const formatCompactNumber = (value: number): string => {
+  if (!Number.isFinite(value)) return '0';
+  const rounded = Math.abs(value) < 0.005 ? 0 : Number(value.toFixed(2));
+  return String(rounded);
+};
+
+export const TopBar = () => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
+  const [isRadioOpen, setIsRadioOpen] = useState(false);
+  const [isEconomyModalOpen, setIsEconomyModalOpen] = useState(false);
+  const [isPoliticsModalOpen, setIsPoliticsModalOpen] = useState(false);
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+  const [isLawStanceModalOpen, setIsLawStanceModalOpen] = useState(false);
+  const [isSaveManagerOpen, setIsSaveManagerOpen] = useState(false);
+  const state = useGameSelector(snapshot => ({
+    language: snapshot.language,
+    year: snapshot.year,
+    month: snapshot.month,
+    difficulty: snapshot.difficulty,
+    resources: snapshot.resources,
+    armaments: snapshot.armaments,
+    currentView: snapshot.currentView,
+    ceda_formed: snapshot.ceda_formed,
+    ir_formed: snapshot.ir_formed,
+    ur_formed: snapshot.ur_formed,
+    organizations: snapshot.organizations,
+    falange_jons: snapshot.falange_jons,
+  }), shallowEqual);
+  const { dispatch } = useGameActions();
+  const { isPlaying } = useMusic();
+
+  const isZh = state.language === 'zh';
+
+  const monthNamesEn = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  const monthNamesZh = [
+    '一月', '二月', '三月', '四月', '五月', '六月',
+    '七月', '八月', '九月', '十月', '十一月', '十二月'
+  ];
+
+  const monthName = isZh ? monthNamesZh[state.month - 1] : monthNamesEn[state.month - 1];
+  const isHardOrHistorical = state.difficulty === 'historical' || state.difficulty === 'hard';
+  const isSandbox = state.difficulty === 'sandbox';
+
+  const toggleLanguage = () => {
+    dispatch({ type: 'SET_LANGUAGE', payload: isZh ? 'en' : 'zh' });
+  };
+
+  return (
+    <>
+      <div className="pointer-events-none relative isolate flex shrink-0 flex-col w-full overflow-hidden">
+        <div className="pointer-events-auto relative flex w-full flex-col items-center justify-between gap-4 bg-ink p-3 text-paper lg:flex-row">
+          <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <h1 className="font-display text-2xl uppercase tracking-widest text-cnt-red leading-none mb-1">
+              {isZh ? '自由未烬' : 'Liberty Unquenched'}
+            </h1>
+            <span className="font-typewriter text-[10px] tracking-widest uppercase opacity-70">
+              {`${getPartyName(state, 'CNT_FAI', isZh, true)} ${isZh ? '全国委员会' : 'Comité Nacional'}`}
+            </span>
+          </div>
+          
+          <div className="h-10 w-px bg-paper opacity-20 hidden sm:block"></div>
+          
+          <div className="flex items-center gap-3 font-serif text-xl">
+            <Calendar className="w-5 h-5 text-cnt-red opacity-80" />
+            <span className="tracking-wide">{isZh ? `${state.year}年 ${monthName}` : `${monthName} ${state.year}`}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 md:gap-8 font-typewriter text-sm overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto justify-start lg:justify-end hide-scrollbar">
+          <div className="flex gap-4 md:gap-6">
+            <ResourceItem icon={<Coins className="w-4 h-4 text-yellow-500" />} label={isZh ? '资源' : 'Resources'} value={state.resources} />
+            <ResourceItem icon={<ShieldAlert className="w-4 h-4 text-gray-400" />} label={isZh ? '军备' : 'Armaments'} value={state.armaments} />
+          </div>
+
+          <div className="h-8 w-px bg-paper opacity-20 hidden md:block"></div>
+          
+          <button 
+            onClick={() => setIsAchievementsOpen(true)}
+            className="p-2 hover:bg-paper/10 hover:text-cnt-red transition-colors rounded-full flex-shrink-0"
+            title={isZh ? '成就' : 'Achievements'}
+          >
+            <Trophy className="w-5 h-5" />
+          </button>
+          
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 hover:bg-paper/10 hover:text-cnt-red transition-colors rounded-full flex-shrink-0 relative"
+            title={isZh ? '设置' : 'Settings'}
+          >
+            <Settings className="w-5 h-5" />
+            {isPlaying && (
+              <span className="absolute top-0 right-0 w-2 h-2 bg-cnt-red rounded-full animate-pulse" />
+            )}
+          </button>
+        </div>
+      </div>
+      
+      {/* Bottom Tabs Section */}
+      <div className="w-full flex h-6 relative z-10">
+        {/* Halftone background for the right section */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-72 right-0 z-0 bg-paper bg-halftone"
+        />
+
+        {/* Black fill behind the first slanted tab to merge with sidebar */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-72 z-10 w-8 bg-ink"
+        />
+
+        {/* Left black section to match sidebar */}
+        <div className="w-72 bg-ink shrink-0 h-full relative z-20" />
+        
+        {/* Right tabs section */}
+        <div className="pointer-events-none relative z-20 flex flex-1 items-end">
+          <TabButton 
+            onClick={() => setIsEconomyModalOpen(true)}
+            isActive={isEconomyModalOpen}
+            label={isZh ? '财政' : 'FINANCE'} 
+          />
+          <TabButton 
+            onClick={() => setIsPoliticsModalOpen(true)}
+            isActive={isPoliticsModalOpen}
+            label={isZh ? '政治' : 'POLITICS'}
+          />
+          <TabButton 
+            onClick={() => setIsPolicyModalOpen(true)}
+            isActive={isPolicyModalOpen}
+            label={isZh ? '法律' : 'LAW'} 
+          />
+          <TabButton
+            onClick={() => setIsLawStanceModalOpen(true)}
+            isActive={isLawStanceModalOpen}
+            label={isZh ? '法律立场' : 'STANCES'}
+          />
+          <TabButton 
+            onClick={() => dispatch({ type: 'TOGGLE_MAP_VIEW' })}
+            isActive={state.currentView === 'map'}
+            label={isZh ? '地图' : 'MAP'} 
+          />
+        </div>
+      </div>
+      </div>
+
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 backdrop-blur-sm p-8"
+            onClick={() => setIsSettingsOpen(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-paper text-ink border-print p-8 max-w-md w-full relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setIsSettingsOpen(false)}
+                className="absolute top-4 right-4 hover:text-cnt-red transition-colors z-50"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              
+              <h2 className="font-display text-4xl uppercase mb-6 border-b-2 border-ink pb-2 text-center">
+                {isZh ? '游戏设置' : 'Settings'}
+              </h2>
+              
+              <div className="flex flex-col gap-4">
+                <button 
+                  onClick={() => {
+                    setIsSettingsOpen(false);
+                    setIsRadioOpen(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-3 p-4 border-2 border-ink hover:bg-ink hover:text-paper transition-colors font-typewriter text-lg uppercase tracking-wider relative"
+                >
+                  <Radio className="w-6 h-6" />
+                  {isZh ? '秘密电台' : 'Radio Clandestina'}
+                  {isPlaying && (
+                    <span className="absolute top-4 right-4 w-2 h-2 bg-cnt-red rounded-full animate-pulse" />
+                  )}
+                </button>
+
+                <button 
+                  onClick={() => setIsAchievementsOpen(true)}
+                  className="w-full flex items-center justify-center gap-3 p-4 border-2 border-ink hover:bg-ink hover:text-paper transition-colors font-typewriter text-lg uppercase tracking-wider"
+                >
+                  <Trophy className="w-6 h-6" />
+                  {isZh ? '查看成就' : 'View Achievements'}
+                </button>
+
+                <button 
+                  onClick={toggleLanguage}
+                  className="w-full flex items-center justify-center gap-3 p-4 border-2 border-ink hover:bg-ink hover:text-paper transition-colors font-typewriter text-lg uppercase tracking-wider"
+                >
+                  <Globe className="w-6 h-6" />
+                  {isZh ? 'Language: English' : '语言: 中文'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsSettingsOpen(false);
+                    setIsSaveManagerOpen(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-3 p-4 border-2 border-ink hover:bg-ink hover:text-paper transition-colors font-typewriter text-lg uppercase tracking-wider"
+                >
+                  <HardDrive className="w-6 h-6" />
+                  {isZh ? (isHardOrHistorical ? '自动存档' : '存档管理') : (isHardOrHistorical ? 'Autosave' : 'Save Archives')}
+                </button>
+
+                {isSandbox && (
+                  <button 
+                    onClick={() => {
+                      setIsSettingsOpen(false);
+                      // We will dispatch a custom event or open a sandbox modal.
+                      // Let's just use a window event for now to open the SandboxMenu component.
+                      window.dispatchEvent(new CustomEvent('open-sandbox-menu'));
+                    }}
+                    className="w-full flex items-center justify-center gap-3 p-4 border-2 border-cnt-red text-cnt-red hover:bg-cnt-red hover:text-paper transition-colors font-typewriter text-lg uppercase tracking-wider"
+                  >
+                    <Settings className="w-6 h-6" />
+                    {isZh ? '沙盒工具' : 'Sandbox Options'}
+                  </button>
+                )}
+              </div>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isAchievementsOpen && (
+          <AchievementsModal onClose={() => setIsAchievementsOpen(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isRadioOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 backdrop-blur-sm p-4 md:p-8"
+            onClick={() => setIsRadioOpen(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-lg w-full relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MusicPlayerUI onClose={() => setIsRadioOpen(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {isEconomyModalOpen && <EconomyModalLayer onClose={() => setIsEconomyModalOpen(false)} isZh={isZh} />}
+      {isPoliticsModalOpen && <PoliticsModalLayer onClose={() => setIsPoliticsModalOpen(false)} isZh={isZh} />}
+      {isPolicyModalOpen && <PolicyModalLayer onClose={() => setIsPolicyModalOpen(false)} isZh={isZh} />}
+      {isLawStanceModalOpen && <LawStanceModalLayer onClose={() => setIsLawStanceModalOpen(false)} isZh={isZh} />}
+      <SaveManagerModal
+        isOpen={isSaveManagerOpen}
+        onClose={() => setIsSaveManagerOpen(false)}
+        isZh={isZh}
+        canSaveManual={!isHardOrHistorical}
+        canLoadManual={!isHardOrHistorical}
+      />
+    </>
+  );
+};
+
+interface DetailModalLayerProps {
+  onClose: () => void;
+  isZh: boolean;
+}
+
+const EconomyModalLayer: React.FC<DetailModalLayerProps> = ({ onClose, isZh }) => {
+  const state = useGameSelector(selectEconomyModalState, areEconomyModalStatesEqual);
+  const { dispatch } = useGameActions();
+  return <EconomyModal isOpen onClose={onClose} state={state} dispatch={dispatch} isZh={isZh} />;
+};
+
+const PoliticsModalLayer: React.FC<DetailModalLayerProps> = ({ onClose, isZh }) => {
+  const state = useGameSelector(selectPoliticalModalState, arePoliticalModalStatesEqual);
+  return <DomesticPoliticsModal isOpen onClose={onClose} state={state} isZh={isZh} />;
+};
+
+const PolicyModalLayer: React.FC<DetailModalLayerProps> = ({ onClose, isZh }) => {
+  const state = useGameSelector(selectDomesticPolicyModalState, areDomesticPolicyModalStatesEqual);
+  return <DomesticPolicyModal isOpen onClose={onClose} state={state} isZh={isZh} />;
+};
+
+const LawStanceModalLayer: React.FC<DetailModalLayerProps> = ({ onClose, isZh }) => {
+  const state = useGameSelector(selectLawStanceModalState, areLawStanceModalStatesEqual);
+  return <LawStanceModal isOpen onClose={onClose} state={state} isZh={isZh} />;
+};
+
+const TabButton = ({ onClick, isActive, label }: { onClick: () => void, isActive?: boolean, label: string }) => (
+  <button 
+    onClick={onClick}
+    className={cn(
+      "pointer-events-auto h-full px-8 flex items-center justify-center -skew-x-[30deg] border-x-2 border-t-2 border-ink transition-colors relative -ml-[2px] origin-bottom-left group",
+      isActive ? "bg-paper text-ink font-bold border-b-0 z-30" : "bg-paper-dark text-ink hover:bg-paper font-medium border-b-2 border-ink z-20"
+    )}
+  >
+    <span className="skew-x-[30deg] text-[10px] uppercase font-typewriter tracking-wider group-hover:scale-105 transition-transform">{label}</span>
+  </button>
+);
+
+const ResourceItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) => (
+  <div className="flex flex-col items-center">
+    <div className="flex items-center gap-1.5 mb-1">
+      {icon}
+      <span className="font-mono text-lg tracking-tight">{formatCompactNumber(value)}</span>
+    </div>
+    <span className="text-[9px] uppercase tracking-widest opacity-60">{label}</span>
+  </div>
+);
