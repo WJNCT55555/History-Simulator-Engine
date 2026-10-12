@@ -1,20 +1,11 @@
 node_modules/
-build/
 dist/
-/dist-editor/
+generated/
+output/
 coverage/
-
-# Local tooling and generated artifacts
-/editor/node_modules/
-/editor/saved-drafts/
-/.agents/
-/start_game.bat
-/output/
-/tools/
-/generated/
-/projects/local/
-
+projects/local/
+.agents/
+.codex/
 .DS_Store
 *.log
 .env*
-!.env.example

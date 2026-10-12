@@ -1,0 +1,130 @@
+[
+  {
+    "input": {
+      "budget": 12,
+      "public_debt": 500,
+      "fiscal_arrears": 0,
+      "gold_reserves": 2200,
+      "foreign_exchange": 180,
+      "economy_growth": 2.5,
+      "inflation_rate": 3.5,
+      "unemployment_rate": 11.2,
+      "economic_output_index": 100,
+      "military_spending": 15,
+      "tax_lower_class": 5,
+      "tax_middle_class": 15,
+      "tax_upper_class": 25,
+      "tax_tariff": 10,
+      "tax_consumption": 8,
+      "armyLoyalty": 50,
+      "warActive": false,
+      "policyCost": 0
+    },
+    "expected": {
+      "nextBudget": 12.42,
+      "nextDebt": 499.72,
+      "nextFiscalArrears": 0,
+      "nextForeignExchange": 180.4,
+      "nextGrowth": 2.3,
+      "nextInflation": 3.35,
+      "nextUnemployment": 11.55,
+      "nextEconomicOutputIndex": 100.19
+    }
+  },
+  {
+    "input": {
+      "budget": 12,
+      "public_debt": 500,
+      "fiscal_arrears": 0,
+      "gold_reserves": 2200,
+      "foreign_exchange": 180,
+      "economy_growth": 2.5,
+      "inflation_rate": 3.5,
+      "unemployment_rate": 11.2,
+      "economic_output_index": 100,
+      "military_spending": 15,
+      "tax_lower_class": 5,
+      "tax_middle_class": 15,
+      "tax_upper_class": 25,
+      "tax_tariff": 10,
+      "tax_consumption": 8,
+      "armyLoyalty": 50,
+      "warActive": true,
+      "policyCost": 0
+    },
+    "expected": {
+      "nextBudget": 6.91,
+      "nextDebt": 500,
+      "nextFiscalArrears": 0,
+      "nextForeignExchange": 176.7,
+      "nextGrowth": 0.2,
+      "nextInflation": 5.75,
+      "nextUnemployment": 12.52,
+      "nextEconomicOutputIndex": 100.02
+    }
+  },
+  {
+    "input": {
+      "budget": 0,
+      "public_debt": 4999,
+      "fiscal_arrears": 15,
+      "gold_reserves": 2200,
+      "foreign_exchange": 180,
+      "economy_growth": 2.5,
+      "inflation_rate": 3.5,
+      "unemployment_rate": 11.2,
+      "economic_output_index": 100,
+      "military_spending": 15,
+      "tax_lower_class": 95,
+      "tax_middle_class": 15,
+      "tax_upper_class": 25,
+      "tax_tariff": 10,
+      "tax_consumption": 8,
+      "armyLoyalty": 50,
+      "warActive": false,
+      "policyCost": 0
+    },
+    "expected": {
+      "nextBudget": 0,
+      "nextDebt": 5000,
+      "nextFiscalArrears": 20.83,
+      "nextForeignExchange": 179.2,
+      "nextGrowth": 0.47,
+      "nextInflation": 4.8,
+      "nextUnemployment": 12.1,
+      "nextEconomicOutputIndex": 100.04
+    }
+  },
+  {
+    "input": {
+      "budget": 1000,
+      "public_debt": 500,
+      "fiscal_arrears": 0,
+      "gold_reserves": 2200,
+      "foreign_exchange": 180,
+      "economy_growth": 2.5,
+      "inflation_rate": 3.5,
+      "unemployment_rate": 11.2,
+      "economic_output_index": 100,
+      "military_spending": 15,
+      "tax_lower_class": 20,
+      "tax_middle_class": 25,
+      "tax_upper_class": 30,
+      "tax_tariff": 10,
+      "tax_consumption": 8,
+      "armyLoyalty": 50,
+      "warActive": false,
+      "policyCost": 0
+    },
+    "expected": {
+      "nextBudget": 1001.13,
+      "nextDebt": 499.25,
+      "nextFiscalArrears": 0,
+      "nextForeignExchange": 180.4,
+      "nextGrowth": 2.1,
+      "nextInflation": 3.23,
+      "nextUnemployment": 11.66,
+      "nextEconomicOutputIndex": 100.17
+    }
+  }
+]

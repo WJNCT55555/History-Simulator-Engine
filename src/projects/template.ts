@@ -1,0 +1,69 @@
+import type { Collection, GameProject, Named, Option } from '../engine/model';
+import { clone } from '../engine/expressions';
+import { ECONOMIC_RULES } from '../engine/economy';
+export const defaultOption = (id='continue'): Option => ({id,name:'继续',effects:[]});
+export function newItem(p: GameProject,collection: Collection,id: string): Named {
+  const base={id,name:'新条目',description:''},actor=p.actors[0]?.id??'',side=p.sides[0]?.id??'',region=p.regions[0]?.id??'';
+  switch(collection){
+    case 'actors': return {...base,color:'#759cbc',eligible:true,turnout:80,relation:50} as Named;
+    case 'groups': return {...base,weight:1,support:Object.fromEntries(p.actors.map((a,i)=>[a.id,i===0?100:0]))} as Named;
+    case 'factions': return {...base,actorId:actor,influence:p.factions.some(f=>f.actorId===actor)?0:100,dissent:10} as Named;
+    case 'organizations': return {...base,actorId:actor,active:true,share:0,income:10,monthlyEffects:[]} as Named;
+    case 'ownership': return {...base,shares:{private:60,cooperative:20,state:20}} as Named;
+    case 'offices': return {...base,holderId:actor,permissions:['policy']} as Named;
+    case 'laws': return {...base,officeId:p.offices[0]?.id??'',initialLevel:0,levels:[{id:'level0',name:'现状',cost:0,upkeep:0,modifiers:{growth:0,inflation:0,unemployment:0,foreignExchange:0},monthlyEffects:[]}]} as Named;
+    case 'variables': return {...base,initial:0,min:0,max:100} as Named;
+    case 'cards': return {...base,category:'action',cost:{ap:1,resources:0,armaments:0},cooldown:0,copies:1,options:[defaultOption()]} as Named;
+    case 'events': return {...base,body:'在这里描述发生的事情。',scheduling:'automatic',mandatory:true,repeatable:false,interval:1,priority:0,condition:{metric:'turn',op:'gte',value:1},options:[defaultOption()]} as Named;
+    case 'advisors': return {...base,actorId:actor,cooldown:3,options:[defaultOption()]} as Named;
+    case 'journals': return {...base,start:{all:[]},success:{metric:'turn',op:'gte',value:12},monthlyEffects:[],rewards:[],penalties:[]} as Named;
+    case 'endings': case 'achievements': return {...base,condition:{metric:'turn',op:'gte',value:24},body:'在这里描述结果。',priority:0} as Named;
+    case 'sides': return {...base,actorIds:[actor],color:'#759cbc',neutral:false,hostileTo:[],supplies:1000,industrialCapacity:100} as Named;
+    case 'sources': return {...base,sideId:side,manpower:10000,artillery:1000,tanks:500,militarization:75} as Named;
+    case 'regions': return {...base,owner:side,x:150+(p.regions.length%4)*200,y:120+Math.floor(p.regions.length/4)*180,neighbors:[],terrain:'plains',industry:10,strategicValue:5,fortification:0,buildings:{barracks:0,fortress:0,recruitingOffice:0,ammoFactory:0}} as Named;
+    case 'armies': return {...base,faction:side,sourceId:p.sources[0]?.id??'',provinceId:region,composition:{infantry:1000,artillery:0,tanks:0},manpower:1000,morale:65,movesLeft:2} as Named;
+    case 'monthlyRules': return {...base,timing:'monthly',stage:'society',effects:[]} as Named;
+    case 'assets': return {...base,mime:'image/png',data:''} as Named;
+  }
+}
+export function blankProject(id='new-game'): GameProject {
+  return {schemaVersion:1,id,version:'1.0.0',name:'新游戏',description:'一个由编辑器制作的历史政治模拟游戏。',start:{year:1,month:1},playerActorId:'movement',playerSideId:'alliance',seed:42,accent:'#a45e35',
+    initial:{resources:20,armaments:10,warActive:false,economy:{budget:12,public_debt:500,fiscal_arrears:0,gold_reserves:2200,foreign_exchange:180,economy_growth:2.5,inflation_rate:3.5,unemployment_rate:11.2,economic_output_index:100,military_spending:15,tax_lower_class:5,tax_middle_class:15,tax_upper_class:25,tax_tariff:10,tax_consumption:8,armyLoyalty:50}},
+    rules:{apPerTurn:2,handSize:4,advisorSlots:3,seats:120,electionEvery:4,coalitionRelation:40,commandPoints:2,movesPerTurn:2,recruitmentCostPerThousand:50,buildingCost:20,baseSupplies:250,destructionThreshold:150,combatWidths:{plains:6000,forest:4500,urban:3000,mountains:2000},unitLabels:{infantry:'步兵',artillery:'支援',tanks:'机动'},economicProfile:clone(ECONOMIC_RULES)},
+    actors:[{id:'movement',name:'群众运动',color:'#b96545',eligible:true,turnout:80,relation:100},{id:'administration',name:'行政联盟',color:'#607e98',eligible:true,turnout:85,relation:60}],
+    groups:[{id:'citizens',name:'居民',weight:100,support:{movement:45,administration:55}}],factions:[],organizations:[],ownership:[],offices:[{id:'executive',name:'行政首席',holderId:'administration',permissions:['policy','fiscal']}],laws:[],variables:[],cards:[],events:[],advisors:[],journals:[],endings:[],achievements:[],
+    sides:[{id:'alliance',name:'联合阵营',actorIds:['movement','administration'],color:'#b96545',neutral:false,hostileTo:['opposition'],supplies:1500,industrialCapacity:100},{id:'opposition',name:'对立阵营',actorIds:['administration'],color:'#607e98',neutral:false,hostileTo:['alliance'],supplies:1500,industrialCapacity:100}],
+    sources:[{id:'alliance_reserve',name:'联合后备',sideId:'alliance',manpower:20000,artillery:3000,tanks:1000,militarization:80},{id:'opposition_reserve',name:'对立后备',sideId:'opposition',manpower:20000,artillery:3000,tanks:1000,militarization:80}],
+    regions:[{id:'capital',name:'中心区',owner:'alliance',x:300,y:300,neighbors:['frontier'],terrain:'urban',industry:20,strategicValue:10,fortification:0,buildings:{barracks:0,fortress:0,recruitingOffice:0,ammoFactory:0}},{id:'frontier',name:'边境区',owner:'opposition',x:620,y:300,neighbors:['capital'],terrain:'plains',industry:10,strategicValue:5,fortification:0,buildings:{barracks:0,fortress:0,recruitingOffice:0,ammoFactory:0}}],
+    armies:[],monthlyRules:[],economicShocks:[],assets:[]};
+}
+export function demoProject(): GameProject {
+  const p=blankProject('commonwealth-demo');p.name='共同体：机制演示';p.description='从组织建设、议会合作到地区冲突，体验一个可完整编辑的中性示例。';
+  p.actors.push({id:'civic',name:'公民议会',color:'#889660',eligible:true,turnout:75,relation:55});
+  p.groups=[{id:'workers',name:'生产者',weight:45,support:{movement:60,administration:25,civic:15}},{id:'farmers',name:'乡村居民',weight:30,support:{movement:30,administration:50,civic:20}},{id:'professionals',name:'专业群体',weight:15,support:{movement:30,administration:30,civic:40}},{id:'managers',name:'经营者',weight:10,support:{movement:10,administration:65,civic:25}}];
+  p.factions=[{id:'autonomy',name:'自治路线',actorId:'movement',influence:60,dissent:15},{id:'coordination',name:'协调路线',actorId:'movement',influence:40,dissent:10}];
+  p.organizations=[{id:'association',name:'基层协会',actorId:'movement',active:true,share:40,income:15,monthlyEffects:[]},{id:'federation',name:'行业联合',actorId:'administration',active:true,share:35,income:10,monthlyEffects:[]}];
+  p.ownership=[{id:'land',name:'土地所有权',shares:{private:60,cooperative:20,state:20}},{id:'industry',name:'生产设施所有权',shares:{private:70,cooperative:10,state:20}}];
+  p.variables=[{id:'reform',name:'制度改革进度',initial:0,min:0,max:100},{id:'crisis',name:'危机压力',initial:0,min:0,max:100}];
+  p.laws=[{id:'labor',name:'劳动保障',officeId:'executive',initialLevel:0,levels:[{id:'baseline',name:'基础保障',cost:0,upkeep:0,modifiers:{},monthlyEffects:[]},{id:'expanded',name:'扩大保障',cost:3,upkeep:0.3,modifiers:{unemployment:-1,growth:0.2},monthlyEffects:[{type:'variable',variableId:'reform',mode:'add',value:4}]}]}];
+  p.cards=[
+    {id:'organize',name:'组织扩展',description:'扩大基层覆盖，争取社会支持。',category:'action',cost:{ap:1,resources:2},cooldown:1,copies:3,options:[{id:'rural',name:'进入乡村',effects:[{type:'support',groupId:'farmers',actorId:'movement',delta:6},{type:'coverage',organizationId:'association',delta:3}]},{id:'urban',name:'联系专业群体',effects:[{type:'support',groupId:'professionals',actorId:'movement',delta:8},{type:'coverage',organizationId:'association',delta:3}]},defaultOption('cancel')]},
+    {id:'fundraising',name:'群众筹款',description:'通过组织网络筹集行动资源。',category:'action',cost:{ap:1},cooldown:0,copies:3,options:[{id:'collect',name:'开展募捐',effects:[{type:'resource',key:'resources',delta:5}]}]},
+    {id:'negotiate',name:'路线协商',description:'协调内部路线，减少异议。',category:'action',cost:{ap:1},cooldown:2,copies:2,options:[{id:'coordinate',name:'达成组织协议',effects:[{type:'dissent',factionId:'autonomy',delta:-5},{type:'dissent',factionId:'coordination',delta:-5},{type:'relation',actorId:'civic',delta:5}]}]},
+    {id:'reform_policy',name:'公共改革',description:'掌握行政权限后推动制度改革。',category:'government',cost:{ap:1,resources:2},cooldown:1,copies:2,options:[{id:'implement',name:'实施改革',effects:[{type:'variable',variableId:'reform',mode:'add',value:10},{type:'ownership',sectorId:'industry',ownerId:'cooperative',delta:3}]}]},
+    {id:'mobilize',name:'后备动员',description:'补充组织兵源。',category:'military',cost:{ap:1,resources:2},cooldown:1,copies:2,options:[{id:'train',name:'动员后备',effects:[{type:'pool',sourceId:'alliance_reserve',key:'manpower',delta:2000}]}]},
+  ];
+  p.events=[
+    {id:'opening',name:'共同体的选择',body:'新的政治秩序正在形成。你将通过组织网络、议会合作与公共改革争取未来。',scheduling:'automatic',condition:{metric:'turn',op:'eq',value:0},mandatory:true,repeatable:false,interval:1,priority:100,options:[{id:'begin',name:'开始组织工作',effects:[],nextEventId:'first_assembly'}]},
+    {id:'first_assembly',name:'基层大会',body:'代表们希望明确组织的工作方向。',scheduling:'chain',mandatory:true,repeatable:false,interval:1,priority:0,options:[{id:'social',name:'扩大社会基础',effects:[{type:'support',groupId:'workers',actorId:'movement',delta:3}]},{id:'reform',name:'提出改革纲领',effects:[{type:'variable',variableId:'reform',mode:'add',value:5}]}]},
+    {id:'crisis',name:'地区危机',body:'边境控制权的争执正在升级。你可以推动妥协，或接受军事冲突。',scheduling:'automatic',condition:{metric:'turn',op:'gte',value:8},mandatory:true,repeatable:false,interval:1,priority:50,options:[{id:'settle',name:'以协商稳定局势',effects:[{type:'relation',actorId:'administration',delta:10},{type:'variable',variableId:'crisis',mode:'set',value:0}]},{id:'conflict',name:'转入战争阶段',effects:[{type:'war',active:true}]}]},
+  ];
+  p.advisors=[{id:'organizer',name:'组织顾问',actorId:'movement',factionId:'autonomy',cooldown:3,description:'擅长连接社会支持与组织经营。',options:[{id:'rally',name:'召开代表会议',effects:[{type:'support',groupId:'farmers',actorId:'movement',delta:5},{type:'dissent',factionId:'autonomy',delta:-5}]}]}];
+  p.journals=[{id:'reform_goal',name:'公共改革计划',start:{all:[]},success:{metric:'variable.reform',op:'gte',value:60},monthlyEffects:[],rewards:[{type:'resource',key:'resources',delta:10}],penalties:[]}];
+  p.monthlyRules=[{id:'pressure',name:'和平危机累积',timing:'monthly',stage:'society',condition:{metric:'warActive',op:'eq',value:0},effects:[{type:'variable',variableId:'crisis',mode:'add',value:3}]},{id:'economic_feedback',name:'失业与社会支持',timing:'monthly',stage:'society',condition:{metric:'economy.unemployment_rate',op:'gt',value:15},effects:[{type:'support',groupId:'workers',actorId:'movement',delta:0.1}]}];
+  const base=p.regions[0];p.regions=[{...clone(base),neighbors:['west','east']},{...clone(base),id:'west',name:'西部生产区',x:130,y:180,neighbors:['capital','border'],terrain:'plains',industry:15,strategicValue:6},{...clone(base),id:'east',name:'东部生产区',x:490,y:180,neighbors:['capital','border'],terrain:'forest',industry:15,strategicValue:6},{...clone(base),id:'border',name:'边境区',owner:'opposition',x:650,y:330,neighbors:['west','east','highland'],terrain:'plains',industry:12,strategicValue:5},{...clone(base),id:'highland',name:'高地区',owner:'opposition',x:810,y:160,neighbors:['border'],terrain:'mountains',industry:5,strategicValue:5}];
+  p.armies=[{id:'defense_unit',name:'联合防卫队',faction:'alliance',identity:'alliance_reserve',sourceId:'alliance_reserve',provinceId:'east',composition:{infantry:8000,artillery:1000,tanks:500},manpower:9500,morale:85,movesLeft:2},{id:'border_unit',name:'边境守备队',faction:'opposition',identity:'opposition_reserve',sourceId:'opposition_reserve',provinceId:'border',composition:{infantry:4000,artillery:500,tanks:100},manpower:4600,morale:60,movesLeft:2}];
+  p.endings=[{id:'defeat',name:'组织失去立足点',condition:{all:[{metric:'warActive',op:'eq',value:1},{metric:'regions.alliance',op:'eq',value:0}]},body:'地区失守，组织需要重新寻找道路。',priority:100},{id:'military_victory',name:'地区统一',condition:{all:[{metric:'warActive',op:'eq',value:1},{metric:'regions.opposition',op:'eq',value:0}]},body:'军事冲突已经结束，重建的任务才刚刚开始。',priority:90},{id:'reform_success',name:'新的制度',condition:{all:[{metric:'warActive',op:'eq',value:0},{metric:'journal.reform_goal',op:'eq',value:2},{metric:'turn',op:'gte',value:12}]},body:'组织基础与制度改革共同塑造了新的政治秩序。',priority:80},{id:'open_future',name:'未完的道路',condition:{metric:'turn',op:'gte',value:24},body:'这一阶段落幕，未来仍取决于已经形成的社会与制度基础。',priority:0}];
+  p.achievements=[{id:'majority',name:'取得多数',condition:{metric:'seats.movement',op:'gt',value:60},body:'取得超过半数的议席。',priority:0},{id:'reformed',name:'改革完成',condition:{metric:'journal.reform_goal',op:'eq',value:2},body:'完成公共改革计划。',priority:0}];
+  return p;
+}

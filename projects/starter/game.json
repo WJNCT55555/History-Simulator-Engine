@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "id": "starter-world",
+  "version": "1.0.0",
+  "name": "新游戏",
+  "description": "一个由编辑器制作的历史政治模拟游戏。",
+  "start": {
+    "year": 1,
+    "month": 1
+  },
+  "playerActorId": "movement",
+  "playerSideId": "alliance",
+  "seed": 42,
+  "accent": "#a45e35",
+  "initial": {
+    "resources": 20,
+    "armaments": 10,
+    "warActive": false,
+    "economy": {
+      "budget": 12,
+      "public_debt": 500,
+      "fiscal_arrears": 0,
+      "gold_reserves": 2200,
+      "foreign_exchange": 180,
+      "economy_growth": 2.5,
+      "inflation_rate": 3.5,
+      "unemployment_rate": 11.2,
+      "economic_output_index": 100,
+      "military_spending": 15,
+      "tax_lower_class": 5,
+      "tax_middle_class": 15,
+      "tax_upper_class": 25,
+      "tax_tariff": 10,
+      "tax_consumption": 8,
+      "armyLoyalty": 50
+    }
+  },
+  "rules": {
+    "apPerTurn": 2,
+    "handSize": 4,
+    "advisorSlots": 3,
+    "seats": 120,
+    "electionEvery": 4,
+    "coalitionRelation": 40,
+    "commandPoints": 2,
+    "movesPerTurn": 2,
+    "recruitmentCostPerThousand": 50,
+    "buildingCost": 20,
+    "baseSupplies": 250,
+    "destructionThreshold": 150,
+    "combatWidths": {
+      "plains": 6000,
+      "forest": 4500,
+      "urban": 3000,
+      "mountains": 2000
+    },
+    "unitLabels": {
+      "infantry": "步兵",
+      "artillery": "支援",
+      "tanks": "机动"
+    },
+    "economicProfile": {
+      "defaults": {
+        "lowerTax": 5,
+        "middleTax": 15,
+        "upperTax": 25,
+        "tariff": 10,
+        "consumptionTax": 8,
+        "budget": 12,
+        "fiscalArrears": 0,
+        "debt": 500,
+        "foreignExchange": 180,
+        "growth": 2.5,
+        "inflation": 3.5,
+        "unemployment": 11.2,
+        "outputIndex": 100,
+        "goldReserves": 2200,
+        "militarySpending": 15,
+        "armyLoyalty": 50
+      },
+      "incomeWeights": {
+        "lower": 4,
+        "middle": 3.5,
+        "upper": 4.5,
+        "consumption": 8,
+        "peaceTariffBase": 5
+      },
+      "taxCapacity": {
+        "lower": {
+          "threshold": 0.25,
+          "slope": 1
+        },
+        "middle": {
+          "threshold": 0.35,
+          "slope": 1.2
+        },
+        "upper": {
+          "threshold": 0.5,
+          "slope": 1.5
+        },
+        "tariff": {
+          "threshold": 0.3,
+          "slope": 1.2
+        },
+        "consumption": {
+          "threshold": 0.25,
+          "slope": 1.4
+        }
+      },
+      "indicatorInertia": {
+        "growth": 0.35,
+        "inflation": 0.3,
+        "unemployment": 0.2
+      },
+      "growthBounds": {
+        "min": -6,
+        "max": 15
+      },
+      "inflationBounds": {
+        "min": -5,
+        "max": 100
+      },
+      "outputBounds": {
+        "min": 40,
+        "max": 200
+      },
+      "fiscalBounds": {
+        "cashMax": 5000,
+        "debtMax": 5000,
+        "arrearsMax": 5000
+      },
+      "deflationUnemployment": {
+        "mildBelow": -0.5,
+        "mildDelta": 0.4,
+        "severeBelow": -5,
+        "severeDelta": 0.8
+      },
+      "militarySpendingBounds": {
+        "min": 5,
+        "max": 100
+      }
+    }
+  },
+  "actors": [
+    {
+      "id": "movement",
+      "name": "群众运动",
+      "color": "#b96545",
+      "eligible": true,
+      "turnout": 80,
+      "relation": 100
+    },
+    {
+      "id": "administration",
+      "name": "行政联盟",
+      "color": "#607e98",
+      "eligible": true,
+      "turnout": 85,
+      "relation": 60
+    }
+  ],
+  "groups": [
+    {
+      "id": "citizens",
+      "name": "居民",
+      "weight": 100,
+      "support": {
+        "movement": 45,
+        "administration": 55
+      }
+    }
+  ],
+  "factions": [],
+  "organizations": [],
+  "ownership": [],
+  "offices": [
+    {
+      "id": "executive",
+      "name": "行政首席",
+      "holderId": "administration",
+      "permissions": [
+        "policy",
+        "fiscal"
+      ]
+    }
+  ],
+  "laws": [],
+  "variables": [],
+  "cards": [],
+  "events": [],
+  "advisors": [],
+  "journals": [],
+  "endings": [],
+  "achievements": [],
+  "sides": [
+    {
+      "id": "alliance",
+      "name": "联合阵营",
+      "actorIds": [
+        "movement",
+        "administration"
+      ],
+      "color": "#b96545",
+      "neutral": false,
+      "hostileTo": [
+        "opposition"
+      ],
+      "supplies": 1500,
+      "industrialCapacity": 100
+    },
+    {
+      "id": "opposition",
+      "name": "对立阵营",
+      "actorIds": [
+        "administration"
+      ],
+      "color": "#607e98",
+      "neutral": false,
+      "hostileTo": [
+        "alliance"
+      ],
+      "supplies": 1500,
+      "industrialCapacity": 100
+    }
+  ],
+  "sources": [
+    {
+      "id": "alliance_reserve",
+      "name": "联合后备",
+      "sideId": "alliance",
+      "manpower": 20000,
+      "artillery": 3000,
+      "tanks": 1000,
+      "militarization": 80
+    },
+    {
+      "id": "opposition_reserve",
+      "name": "对立后备",
+      "sideId": "opposition",
+      "manpower": 20000,
+      "artillery": 3000,
+      "tanks": 1000,
+      "militarization": 80
+    }
+  ],
+  "regions": [
+    {
+      "id": "capital",
+      "name": "中心区",
+      "owner": "alliance",
+      "x": 300,
+      "y": 300,
+      "neighbors": [
+        "frontier"
+      ],
+      "terrain": "urban",
+      "industry": 20,
+      "strategicValue": 10,
+      "fortification": 0,
+      "buildings": {
+        "barracks": 0,
+        "fortress": 0,
+        "recruitingOffice": 0,
+        "ammoFactory": 0
+      }
+    },
+    {
+      "id": "frontier",
+      "name": "边境区",
+      "owner": "opposition",
+      "x": 620,
+      "y": 300,
+      "neighbors": [
+        "capital"
+      ],
+      "terrain": "plains",
+      "industry": 10,
+      "strategicValue": 5,
+      "fortification": 0,
+      "buildings": {
+        "barracks": 0,
+        "fortress": 0,
+        "recruitingOffice": 0,
+        "ammoFactory": 0
+      }
+    }
+  ],
+  "armies": [],
+  "monthlyRules": [],
+  "economicShocks": [],
+  "assets": []
+}

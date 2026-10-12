@@ -1,24 +1,7 @@
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
-
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
-  return {
-    // Keep the historical default for local/AI Studio builds, while allowing
-    // GitHub Actions to provide the actual repository path for GitHub Pages.
-    base: env.VITE_BASE_PATH || '/Liberty-Unquenched/',
-    plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
-    },
-    server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-    },
-  };
-});
+import { defineConfig } from 'vite';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { projectApi } from './editor/server';
+const root=path.dirname(fileURLToPath(import.meta.url));
+export default defineConfig({base:'./',plugins:[react(),projectApi(root)],server:{host:'127.0.0.1',port:3000,open:false},esbuild:{target:'es2022'},optimizeDeps:{esbuildOptions:{target:'es2022'}},build:{target:'es2022',rollupOptions:{input:{player:path.join(root,'index.html'),studio:path.join(root,'editor/index.html')}}}});
