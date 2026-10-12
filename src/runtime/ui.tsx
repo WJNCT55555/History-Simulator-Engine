@@ -1,0 +1,38 @@
+import { useEffect, useRef, type ReactNode } from 'react';
+import type { GameProject, RuntimeState } from '../engine/model';
+import { discipline, support } from '../engine/expressions';
+import { Map as MapIcon, X } from 'lucide-react';
+
+export function Modal({title,onClose,children}:{title:string;onClose:()=>void;children:ReactNode}) {
+  const dialog=useRef<HTMLDialogElement>(null);
+  useEffect(()=>{const element=dialog.current,previous=document.activeElement as HTMLElement|null;element?.showModal();return()=>{element?.close();previous?.focus();};},[]);
+  return <dialog ref={dialog} className="game-dialog" aria-label={title} onCancel={e=>{e.preventDefault();onClose();}} onClick={e=>{if(e.target===e.currentTarget){const box=e.currentTarget.getBoundingClientRect();if(e.clientX<box.left||e.clientX>box.right||e.clientY<box.top||e.clientY>box.bottom)onClose();}}}><div className="modal-head"><h2>{title}</h2><button aria-label="关闭窗口" onClick={onClose}><X size={20}/></button></div><div className="modal-content">{children}</div></dialog>;
+}
+export function StatBar({name,value,color,max=100}:{name:string;value:number;color?:string;max?:number}) {
+  return <div className="status-meter"><div><span>{name}</span><strong>{value.toFixed(1)}</strong></div><div className="bar"><i style={{width:`${Math.max(0,Math.min(100,value/Math.max(1,max)*100))}%`,background:color}}/></div></div>;
+}
+export function Parliament({project:p,state:s}:{project:GameProject;state:RuntimeState}) {
+  return <svg className="parliament" viewBox="0 0 400 215" role="img" aria-label={`议席图，共 ${p.rules.seats} 席`}>{p.actors.flatMap(a=>Array.from({length:s.seats[a.id]},()=>a)).map((a,i,all)=>{const columns=Math.ceil(Math.sqrt(all.length)*2.5),rows=Math.ceil(all.length/columns),row=Math.floor(i/columns),start=row*columns,quantity=Math.min(columns,all.length-start),angle=Math.PI-(i-start)/Math.max(1,quantity-1)*Math.PI,radius=rows===1?140:60+row/(rows-1)*125;return <circle key={i} cx={200+radius*Math.cos(angle)} cy={195-radius*Math.sin(angle)} r={Math.min(5,60/Math.max(1,Math.ceil(Math.sqrt(all.length)/2.5)))} fill={a.color}><title>{a.name}</title></circle>;})}</svg>;
+}
+export function Distribution({entries}:{entries:Array<{id:string;name:string;value:number;color:string}>}) {
+  let cursor=0;const slices=entries.map(entry=>{const start=cursor;cursor+=entry.value;return `${entry.color} ${start}% ${cursor}%`;});
+  return <div className="distribution"><div className="donut" role="img" aria-label={entries.map(v=>`${v.name} ${v.value.toFixed(1)}%`).join('，')} style={{background:cursor>0?`conic-gradient(${slices.join(',')})`:'#d9d2c1'}}/><div className="distribution-legend">{entries.map(entry=><div key={entry.id}><span><i style={{background:entry.color}}/>{entry.name}</span><strong>{entry.value.toFixed(1)}%</strong></div>)}</div></div>;
+}
+const ownershipNames:Record<string,string>={private:'私人',cooperative:'合作组织',state:'国家'};
+export const ownershipName=(id:string)=>ownershipNames[id]??id;
+const palette=['#a74b3e','#626f81','#9b864c','#6c6e52','#89677c','#427c79'];
+export function Sidebar({project:p,state:s,isMap,onMap,onDetail}:{project:GameProject;state:RuntimeState;isMap:boolean;onMap:()=>void;onDetail:(page:'society'|'politics'|'economy')=>void}) {
+  const organizationEntries=[...p.organizations.filter(o=>s.founded.includes(o.id)).map((o,i)=>({id:o.id,name:o.name,value:s.coverage[o.id],color:palette[i%palette.length]})),{id:'unorganized',name:'未组织',value:s.coverage.unorganized,color:'#b4ac99'}];
+  return <aside className="game-sidebar" aria-label="世界状态"><details open><summary>{s.warActive?'战争形势':'世界地图'}</summary>{s.warActive&&p.sides.map(side=><div className="ledger-row" key={side.id}><span>{side.name}</span><strong>{p.regions.filter(r=>s.regions[r.id].owner===side.id).length} 地区</strong></div>)}<button className="wide-button" onClick={onMap}><MapIcon size={14}/>{isMap?'返回事务桌':'查看全国地图'}</button></details>
+  {!!p.variables.length&&<details open><summary>局势与进程</summary>{p.variables.map(v=><StatBar key={v.id} name={v.name} value={s.variables[v.id]} max={v.max} />)}<StatBar name="军队忠诚" value={s.economy.armyLoyalty} color="#6b8057"/></details>}
+  <details open><summary>组织与生产</summary><div className="caption">组织化率 {(100-s.coverage.unorganized).toFixed(1)}%</div><Distribution entries={organizationEntries}/>{p.ownership.map(sector=><div className="ownership-summary" key={sector.id}><h3>{sector.name}</h3><Distribution entries={Object.entries(s.ownership[sector.id]).map(([id,value],i)=>({id,name:ownershipName(id),value,color:palette[i%palette.length]}))}/></div>)}</details>
+  <details open><summary>国内政治</summary><div className="ledger-row"><span>全国支持</span><strong>{support(p,s,p.playerActorId).toFixed(1)}%</strong></div><div className="ledger-row"><span>政府</span><strong>{s.government.length?s.government.map(id=>p.actors.find(a=>a.id===id)?.name).join(' / '):'等待组阁'}</strong></div>{p.offices.map(o=><div className="ledger-row" key={o.id}><span>{o.name}</span><strong>{p.actors.find(a=>a.id===s.offices[o.id])?.name??'空缺'}</strong></div>)}{p.rules.electionEvery>0&&<div className="ledger-row"><span>下次选举</span><strong>{p.rules.electionEvery-s.turn%p.rules.electionEvery} 月后</strong></div>}</details>
+  <details open><summary>主体关系</summary>{p.actors.filter(a=>a.id!==p.playerActorId).map(a=><StatBar key={a.id} name={a.name} value={s.relations[a.id]} color={a.color}/>)}</details>
+  <details open><summary>议会分布</summary><div className="seat-strip">{p.actors.map(a=><i key={a.id} style={{width:`${s.seats[a.id]/p.rules.seats*100}%`,background:a.color}} title={`${a.name}：${s.seats[a.id]} 席`}/>)}</div>{p.actors.map(a=><div className="ledger-row" key={a.id}><span><i className="color-key" style={{background:a.color}}/>{a.name}</span><strong>{s.seats[a.id]} 席</strong></div>)}<button className="wide-button" onClick={()=>onDetail('politics')}>查看议会与联盟</button></details>
+  <details open><summary>国家经济与税收</summary><div className="economic-mini">{[['现金',s.economy.budget],['增长',s.economy.economy_growth],['通胀',s.economy.inflation_rate],['失业',s.economy.unemployment_rate]].map(([name,value])=><div key={name}><span>{name}</span><strong>{Number(value).toFixed(2)}</strong></div>)}</div><button className="wide-button" onClick={()=>onDetail('economy')}>查看财政账本</button></details>
+  {!!p.factions.length&&<details open><summary>内部派系</summary>{[...new Set(p.factions.map(f=>f.actorId))].map(actorId=><div key={actorId}><h3>{p.actors.find(a=>a.id===actorId)?.name}</h3><Distribution entries={p.factions.filter(f=>f.actorId===actorId).map((f,i)=>({id:f.id,name:f.name,value:s.factions[f.id].influence,color:palette[i%palette.length]}))}/>{p.factions.filter(f=>f.actorId===actorId).map(f=><StatBar key={f.id} name={`${f.name} · 异议`} value={s.factions[f.id].dissent}/>)}<div className="caption">组织纪律 {(discipline(p,s,actorId)*100).toFixed(1)}%</div></div>)}</details>}
+  <details><summary>武装情况</summary>{p.sources.map(source=><div className="source-summary" key={source.id}><h3>{source.name}</h3><div className="caption">{p.sides.find(v=>v.id===s.sourceSides[source.id])?.name}</div><div className="ledger-row"><span>后备人数</span><strong>{s.sources[source.id].manpower.toLocaleString()}</strong></div><StatBar name="组织化率" value={s.militarization[source.id]}/></div>)}</details>
+  <details><summary>群体民意</summary>{p.groups.map(g=><StatBar key={g.id} name={g.name} value={s.support[g.id][p.playerActorId]}/>)}<button className="wide-button" onClick={()=>onDetail('society')}>查看完整支持分布</button></details>
+  <details><summary>全国支持率</summary>{p.actors.map(a=><StatBar key={a.id} name={a.name} value={support(p,s,a.id)} color={a.color}/>)}</details>
+  </aside>;
+}
